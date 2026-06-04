@@ -1,6 +1,7 @@
 services:
   web:
     build: .
+    network_mode: "bridge"
     restart: unless-stopped
     ports:
       - "5000:5000"
