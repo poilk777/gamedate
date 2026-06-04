@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameDate — Найди команду мечты</title>
+<style>
+:root {
+  --bg: #07070f;
+  --bg2: #0f0f1e;
+  --bg3: #161628;
+  --card: #111122;
+  --accent: #7c3aed;
+  --accent2: #a855f7;
+  --green: #10b981;
+  --red: #ef4444;
+  --text: #e2e8f0;
+  --text2: #8892aa;
+  --border: #252540;
+  --r: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); }
+a { color: var(--accent2); text-decoration: none; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 58px;
+  background: rgba(7,7,15,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 24px; gap: 8px;
+}
+.nav-logo { font-size: 1.25rem; font-weight: 800; color: var(--accent2); margin-right: auto; }
+.nav-logo span { color: var(--text); }
+.nav-btn {
+  padding: 7px 16px; border-radius: 8px; border: none; cursor: pointer;
+  font-size: 0.875rem; font-weight: 600; transition: .15s;
+}
+.nav-btn.ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+.nav-btn.ghost:hover { background: var(--bg3); color: var(--text); }
+.nav-btn.primary { background: var(--accent); color: #fff; }
+.nav-btn.primary:hover { background: var(--accent2); }
+.nav-btn.active { color: var(--accent2); }
+#nav-user { display: none; align-items: center; gap: 8px; }
+#nav-user .name { font-size: .875rem; color: var(--text2); }
+
+/* PAGES */
+main { padding-top: 58px; min-height: 100%; }
+.page { display: none; padding: 32px 24px; max-width: 860px; margin: 0 auto; }
+.page.active { display: block; }
+
+/* LANDING */
+#page-landing { max-width: 100%; padding: 0; }
+.hero {
+  min-height: calc(100vh - 58px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 40px 24px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,.18) 0%, transparent 70%);
+}
+.hero h1 { font-size: clamp(2rem, 6vw, 4rem); font-weight: 900; line-height: 1.1; margin-bottom: 16px; }
+.hero h1 .accent { color: var(--accent2); }
+.hero p { font-size: 1.125rem; color: var(--text2); max-width: 520px; margin-bottom: 36px; line-height: 1.6; }
+.hero-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.btn {
+  padding: 12px 28px; border-radius: 10px; border: none; cursor: pointer;
+  font-size: 1rem; font-weight: 700; transition: .15s;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--bg3); }
+.features {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px; padding: 60px 40px; max-width: 1000px; margin: 0 auto;
+}
+.feature-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 28px 24px;
+}
+.feature-card .icon { font-size: 2rem; margin-bottom: 12px; }
+.feature-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+.feature-card p { color: var(--text2); font-size: .9rem; line-height: 1.5; }
+
+/* MODAL */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 36px; width: 100%; max-width: 420px;
+  position: relative;
+}
+.modal h2 { font-size: 1.5rem; margin-bottom: 24px; }
+.modal-close {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: none; color: var(--text2);
+  font-size: 1.25rem; cursor: pointer;
+}
+.modal-close:hover { color: var(--text); }
+.tab-row { display: flex; gap: 4px; margin-bottom: 24px; }
+.tab {
+  flex: 1; padding: 8px; border: none; border-radius: 8px;
+  cursor: pointer; font-weight: 600; font-size: .9rem;
+  background: var(--bg3); color: var(--text2); transition: .15s;
+}
+.tab.active { background: var(--accent); color: #fff; }
+
+/* FORMS */
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: .85rem; color: var(--text2); margin-bottom: 6px; }
+input[type=text], input[type=email], input[type=password], input[type=url],
+textarea, select {
+  width: 100%; padding: 10px 14px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--bg3);
+  color: var(--text); font-size: .95rem; outline: none; transition: .15s;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+textarea { resize: vertical; min-height: 80px; }
+.form-error { color: var(--red); font-size: .85rem; margin-top: 6px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* SKILLS PICKER */
+.skills-picker { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.skill-chip {
+  padding: 5px 12px; border-radius: 20px; font-size: .8rem; font-weight: 600;
+  border: 1px solid var(--border); background: var(--bg3);
+  cursor: pointer; transition: .15s; color: var(--text2);
+}
+.skill-chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* CARDS */
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 24px;
+}
+.card + .card { margin-top: 16px; }
+.card-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
+.avatar {
+  width: 52px; height: 52px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; flex-shrink: 0;
+}
+.card-meta { flex: 1; }
+.card-name { font-size: 1.1rem; font-weight: 700; }
+.card-sub { font-size: .85rem; color: var(--text2); margin-top: 2px; }
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px; border-radius: 20px; font-size: .75rem; font-weight: 700;
+  background: rgba(124,58,237,.2); color: var(--accent2);
+  border: 1px solid rgba(124,58,237,.3);
+}
+.badge.green { background: rgba(16,185,129,.15); color: var(--green); border-color: rgba(16,185,129,.3); }
+.badge.red { background: rgba(239,68,68,.15); color: var(--red); border-color: rgba(239,68,68,.3); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.tag {
+  padding: 3px 10px; border-radius: 6px; font-size: .75rem;
+  background: var(--bg3); color: var(--text2); border: 1px solid var(--border);
+}
+
+/* SWIPE */
+#page-swipe-candidates, #page-swipe-projects { max-width: 540px; }
+.swipe-area {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px 0;
+}
+.swipe-card-wrapper { width: 100%; max-width: 420px; position: relative; margin-bottom: 24px; }
+.swipe-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 28px; width: 100%;
+  transition: transform .35s cubic-bezier(.175,.885,.32,1.275), opacity .3s;
+}
+.swipe-card.fly-right {
+  transform: translateX(120%) rotate(12deg);
+  opacity: 0;
+}
+.swipe-card.fly-left {
+  transform: translateX(-120%) rotate(-12deg);
+  opacity: 0;
+}
+.swipe-card .big-role {
+  font-size: 1.5rem; font-weight: 900; color: var(--accent2);
+  margin-bottom: 4px;
+}
+.swipe-card .swipe-name { font-size: 1.25rem; font-weight: 700; margin-bottom: 12px; }
+.swipe-card .swipe-bio { color: var(--text2); font-size: .9rem; line-height: 1.5; margin-bottom: 14px; }
+.swipe-actions { display: flex; gap: 20px; justify-content: center; }
+.action-btn {
+  width: 64px; height: 64px; border-radius: 50%; border: 2px solid;
+  background: none; cursor: pointer; font-size: 1.5rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .15s, background .15s;
+}
+.action-btn:hover { transform: scale(1.12); }
+.action-btn.pass { border-color: var(--red); color: var(--red); }
+.action-btn.pass:hover { background: rgba(239,68,68,.1); }
+.action-btn.like { border-color: var(--green); color: var(--green); }
+.action-btn.like:hover { background: rgba(16,185,129,.1); }
+.swipe-filter {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  justify-content: center; margin-bottom: 20px;
+}
+.filter-chip {
+  padding: 6px 14px; border-radius: 20px; font-size: .8rem; font-weight: 600;
+  border: 1px solid var(--border); background: var(--bg3);
+  cursor: pointer; transition: .15s; color: var(--text2);
+}
+.filter-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.swipe-empty {
+  text-align: center; padding: 60px 20px;
+  color: var(--text2); font-size: 1rem;
+}
+.swipe-empty .emoji { font-size: 3rem; margin-bottom: 12px; }
+
+/* MATCH POPUP */
+.match-popup {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,.8); backdrop-filter: blur(6px);
+  align-items: center; justify-content: center; flex-direction: column;
+  text-align: center;
+}
+.match-popup.show { display: flex; }
+.match-popup h2 { font-size: 2.5rem; font-weight: 900; color: var(--accent2); margin-bottom: 12px; }
+.match-popup p { color: var(--text2); margin-bottom: 28px; font-size: 1.1rem; }
+
+/* SECTION TITLE */
+.section-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 20px; }
+.section-sub { color: var(--text2); font-size: .9rem; margin-top: -14px; margin-bottom: 20px; }
+
+/* DASHBOARD GRID */
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px; margin-bottom: 32px;
+}
+.dash-tile {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 24px 20px;
+  cursor: pointer; transition: .15s; text-align: left;
+}
+.dash-tile:hover { border-color: var(--accent); transform: translateY(-2px); }
+.dash-tile .tile-icon { font-size: 2rem; margin-bottom: 12px; }
+.dash-tile h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+.dash-tile p { font-size: .8rem; color: var(--text2); }
+
+/* ROLES BUILDER */
+.roles-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.role-item {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px; position: relative;
+}
+.role-item .remove-role {
+  position: absolute; top: 10px; right: 12px;
+  background: none; border: none; color: var(--text2);
+  cursor: pointer; font-size: 1rem;
+}
+.role-item .remove-role:hover { color: var(--red); }
+
+/* PROJECTS LIST */
+.project-item {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 20px 22px;
+  display: flex; align-items: center; gap: 16px; cursor: pointer;
+  transition: .15s;
+}
+.project-item:hover { border-color: var(--accent); }
+.project-item + .project-item { margin-top: 12px; }
+.project-item .pi-info { flex: 1; }
+.project-item .pi-title { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+.project-item .pi-sub { font-size: .8rem; color: var(--text2); }
+.project-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), #c026d3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; flex-shrink: 0;
+}
+
+/* INV LIST */
+.inv-item {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 18px 20px; margin-bottom: 12px;
+}
+.inv-item .inv-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.inv-actions { display: flex; gap: 8px; margin-top: 10px; }
+.btn-sm {
+  padding: 6px 16px; border-radius: 7px; border: none;
+  font-size: .82rem; font-weight: 700; cursor: pointer;
+}
+.btn-accept { background: var(--green); color: #fff; }
+.btn-reject { background: transparent; color: var(--red); border: 1px solid var(--red); }
+.btn-accept:hover { opacity: .85; }
+.btn-reject:hover { background: rgba(239,68,68,.1); }
+
+/* LOADER */
+.loader {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 3px solid var(--border); border-top-color: var(--accent2);
+  animation: spin .8s linear infinite; margin: 40px auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* TOAST */
+#toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text); padding: 10px 22px; border-radius: 10px;
+  font-size: .9rem; z-index: 500;
+  opacity: 0; transition: opacity .25s; pointer-events: none;
+}
+#toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <div class="nav-logo">Game<span>Date</span></div>
+  <div id="nav-guest">
+    <button class="nav-btn ghost" onclick="openAuth('login')">Войти</button>
+    <button class="nav-btn primary" onclick="openAuth('register')">Регистрация</button>
+  </div>
+  <div id="nav-user">
+    <button class="nav-btn ghost" onclick="showPage('dashboard')">Главная</button>
+    <button class="nav-btn ghost" onclick="showPage('invitations')">📬 Приглашения</button>
+    <span class="name" id="nav-name"></span>
+    <button class="nav-btn ghost" onclick="doLogout()">Выйти</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- LANDING -->
+<div id="page-landing" class="page">
+  <div class="hero">
+    <h1>Найди <span class="accent">команду мечты</span><br>для игры своей жизни</h1>
+    <p>Листай профили разработчиков и проекты как в Tinder. Мэтчись с командой, которая разделяет твои идеи.</p>
+    <div class="hero-btns">
+      <button class="btn btn-primary" onclick="openAuth('register')">Начать — это бесплатно</button>
+      <button class="btn btn-outline" onclick="openAuth('login')">Уже есть аккаунт</button>
+    </div>
+  </div>
+  <div class="features">
+    <div class="feature-card">
+      <div class="icon">🎮</div>
+      <h3>Создай проект</h3>
+      <p>Опиши игру, выбери жанр и укажи какие роли нужны в команде — программисты, художники, дизайнеры.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">💼</div>
+      <h3>Создай профиль</h3>
+      <p>Укажи свою роль и навыки, добавь ссылку на портфолио. Тебя найдут проекты под твой скилл.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">❤️</div>
+      <h3>Свайпай и мэтчись</h3>
+      <p>Листай кандидатов или проекты. Взаимный интерес — и вы уже в одной команде.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🚀</div>
+      <h3>Делай игры</h3>
+      <p>Меньше времени на поиск команды, больше времени на создание крутых игр.</p>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page">
+  <div class="section-title" id="dash-title">Добро пожаловать</div>
+  <div class="dash-grid">
+    <div class="dash-tile" onclick="showPage('profile')">
+      <div class="tile-icon">👤</div>
+      <h3>Мой профиль</h3>
+      <p>Роль, навыки, портфолио</p>
+    </div>
+    <div class="dash-tile" onclick="showPage('swipe-projects')">
+      <div class="tile-icon">🔍</div>
+      <h3>Найти проект</h3>
+      <p>Листать проекты под мою роль</p>
+    </div>
+    <div class="dash-tile" onclick="showPage('new-project')">
+      <div class="tile-icon">➕</div>
+      <h3>Создать проект</h3>
+      <p>Набрать команду для игры</p>
+    </div>
+    <div class="dash-tile" onclick="showPage('my-projects')">
+      <div class="tile-icon">🎲</div>
+      <h3>Мои проекты</h3>
+      <p>Управление и поиск команды</p>
+    </div>
+    <div class="dash-tile" onclick="showPage('invitations')">
+      <div class="tile-icon">📬</div>
+      <h3>Приглашения</h3>
+      <p>Входящие и исходящие</p>
+    </div>
+  </div>
+</div>
+
+<!-- CANDIDATE PROFILE -->
+<div id="page-profile" class="page">
+  <button class="nav-btn ghost" style="margin-bottom:20px" onclick="showPage('dashboard')">← Назад</button>
+  <div class="section-title">Мой профиль кандидата</div>
+  <div class="section-sub">Здесь тебя найдут проекты, которым нужна твоя роль</div>
+  <div class="card">
+    <div class="form-group">
+      <label>Основная роль</label>
+      <select id="cp-role">
+        <option value="">Выбери роль</option>
+        <option>Программист</option>
+        <option>2D художник</option>
+        <option>3D художник</option>
+        <option>Pixel-арт художник</option>
+        <option>Аниматор</option>
+        <option>Концепт-художник</option>
+        <option>Геймдизайнер</option>
+        <option>Level designer</option>
+        <option>UI/UX дизайнер</option>
+        <option>Композитор</option>
+        <option>Звуковой дизайнер</option>
+        <option>Нарративный дизайнер</option>
+        <option>Продюсер</option>
+        <option>QA тестировщик</option>
+        <option>Community Manager</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Навыки / технологии</label>
+      <div class="skills-picker" id="cp-skills-picker"></div>
+    </div>
+    <div class="form-group">
+      <label>Ссылка на портфолио / GitHub</label>
+      <input type="url" id="cp-portfolio" placeholder="https://...">
+    </div>
+    <div class="form-group">
+      <label>О себе</label>
+      <textarea id="cp-bio" rows="3" placeholder="Расскажи кратко о своём опыте..."></textarea>
+    </div>
+    <div class="form-error" id="cp-error"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="saveProfile()">Сохранить профиль</button>
+  </div>
+</div>
+
+<!-- NEW PROJECT -->
+<div id="page-new-project" class="page">
+  <button class="nav-btn ghost" style="margin-bottom:20px" onclick="showPage('dashboard')">← Назад</button>
+  <div class="section-title">Создать проект</div>
+  <div class="card">
+    <div class="form-group">
+      <label>Название игры</label>
+      <input type="text" id="np-title" placeholder="Название вашего проекта">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Жанр</label>
+        <select id="np-genre">
+          <option value="">Выбери жанр</option>
+          <option>Action</option><option>RPG</option><option>Strategy</option>
+          <option>Puzzle</option><option>Platformer</option><option>Horror</option>
+          <option>Shooter</option><option>Simulation</option><option>Visual Novel</option>
+          <option>Sports</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Движок</label>
+        <select id="np-engine">
+          <option value="">Выбери движок</option>
+          <option>Unity</option><option>Unreal Engine</option><option>Godot</option>
+          <option>GameMaker</option><option>Phaser</option><option>Bevy</option>
+          <option>Custom / Другой</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Описание проекта</label>
+      <textarea id="np-desc" rows="4" placeholder="Расскажи об идее, механиках, прогрессе..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Нужны в команде</label>
+      <div class="roles-list" id="np-roles"></div>
+      <button class="btn btn-outline" style="font-size:.85rem;padding:8px 16px" onclick="openRoleModal()">+ Добавить роль</button>
+    </div>
+    <div class="form-error" id="np-error"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="createProject()">Создать проект</button>
+  </div>
+</div>
+
+<!-- MY PROJECTS -->
+<div id="page-my-projects" class="page">
+  <button class="nav-btn ghost" style="margin-bottom:20px" onclick="showPage('dashboard')">← Назад</button>
+  <div class="section-title">Мои проекты</div>
+  <div id="mp-list"><div class="loader"></div></div>
+</div>
+
+<!-- SWIPE CANDIDATES -->
+<div id="page-swipe-candidates" class="page">
+  <button class="nav-btn ghost" style="margin-bottom:20px" onclick="showPage('my-projects')">← К проектам</button>
+  <div class="section-title" id="sc-title">Найти кандидатов</div>
+  <div class="swipe-filter" id="sc-filters"></div>
+  <div class="swipe-area">
+    <div id="sc-loader" class="loader"></div>
+    <div class="swipe-card-wrapper" id="sc-wrapper" style="display:none">
+      <div class="swipe-card" id="sc-card">
+        <div class="big-role" id="sc-role"></div>
+        <div class="swipe-name" id="sc-name"></div>
+        <div class="swipe-bio" id="sc-bio"></div>
+        <div class="tags" id="sc-skills"></div>
+        <a id="sc-portfolio" href="#" target="_blank" style="display:none;font-size:.85rem;margin-top:10px;display:block"></a>
+      </div>
+    </div>
+    <div class="swipe-empty" id="sc-empty" style="display:none">
+      <div class="emoji">😅</div>
+      <div id="sc-empty-msg">Кандидаты закончились</div>
+    </div>
+    <div class="swipe-actions" id="sc-actions" style="display:none">
+      <button class="action-btn pass" onclick="doSwipe('pass')" title="Пропустить (←)">✕</button>
+      <button class="action-btn like" onclick="doSwipe('like')" title="Пригласить (→)">♥</button>
+    </div>
+  </div>
+</div>
+
+<!-- SWIPE PROJECTS -->
+<div id="page-swipe-projects" class="page">
+  <button class="nav-btn ghost" style="margin-bottom:20px" onclick="showPage('dashboard')">← Назад</button>
+  <div class="section-title">Найти проект</div>
+  <div class="swipe-area">
+    <div id="sp-loader" class="loader"></div>
+    <div class="swipe-card-wrapper" id="sp-wrapper" style="display:none">
+      <div class="swipe-card" id="sp-card">
+        <div class="big-role" id="sp-title"></div>
+        <div style="margin-bottom:10px" id="sp-badges"></div>
+        <div class="swipe-bio" id="sp-desc"></div>
+        <div style="font-size:.85rem;color:var(--text2);margin-bottom:8px" id="sp-owner"></div>
+        <div class="tags" id="sp-roles"></div>
+      </div>
+    </div>
+    <div class="swipe-empty" id="sp-empty" style="display:none">
+      <div class="emoji">🎮</div>
+      <div id="sp-empty-msg">Проекты закончились</div>
+    </div>
+    <div class="swipe-actions" id="sp-actions" style="display:none">
+      <button class="action-btn pass" onclick="doProjectSwipe('pass')" title="Пропустить (←)">✕</button>
+      <button class="action-btn like" onclick="doProjectSwipe('like')" title="Подать заявку (→)">♥</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVITATIONS -->
+<div id="page-invitations" class="page">
+  <button class="nav-btn ghost" style="margin-bottom:20px" onclick="showPage('dashboard')">← Назад</button>
+  <div class="section-title">Приглашения</div>
+  <div id="inv-content"><div class="loader"></div></div>
+</div>
+
+</main>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAuth()">✕</button>
+    <h2 id="auth-title">Войти</h2>
+    <div class="tab-row">
+      <button class="tab" id="tab-login" onclick="switchAuthTab('login')">Войти</button>
+      <button class="tab" id="tab-register" onclick="switchAuthTab('register')">Регистрация</button>
+    </div>
+    <div id="login-form">
+      <div class="form-group"><label>Email</label><input type="email" id="l-email" placeholder="your@email.com"></div>
+      <div class="form-group"><label>Пароль</label><input type="password" id="l-pass" placeholder="••••••"></div>
+      <div class="form-error" id="l-error"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="doLogin()">Войти</button>
+    </div>
+    <div id="register-form" style="display:none">
+      <div class="form-group"><label>Имя</label><input type="text" id="r-name" placeholder="Как тебя зовут?"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="r-email" placeholder="your@email.com"></div>
+      <div class="form-group"><label>Пароль</label><input type="password" id="r-pass" placeholder="Минимум 6 символов"></div>
+      <div class="form-error" id="r-error"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="doRegister()">Создать аккаунт</button>
+    </div>
+  </div>
+</div>
+
+<!-- ROLE MODAL -->
+<div class="modal-overlay" id="role-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeRoleModal()">✕</button>
+    <h2>Добавить роль</h2>
+    <div class="form-group">
+      <label>Роль</label>
+      <select id="rm-role">
+        <option value="">Выбери роль</option>
+        <option>Программист</option><option>2D художник</option><option>3D художник</option>
+        <option>Pixel-арт художник</option><option>Аниматор</option><option>Концепт-художник</option>
+        <option>Геймдизайнер</option><option>Level designer</option><option>UI/UX дизайнер</option>
+        <option>Композитор</option><option>Звуковой дизайнер</option><option>Нарративный дизайнер</option>
+        <option>Продюсер</option><option>QA тестировщик</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Желательные навыки</label>
+      <div class="skills-picker" id="rm-skills-picker"></div>
+    </div>
+    <div class="form-group">
+      <label>Описание задач (необязательно)</label>
+      <textarea id="rm-desc" rows="2" placeholder="Что будет делать этот человек?"></textarea>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="addRole()">Добавить</button>
+  </div>
+</div>
+
+<!-- MATCH POPUP -->
+<div class="match-popup" id="match-popup">
+  <h2>🎮 Это мэтч!</h2>
+  <p id="match-msg">Вы взаимно заинтересованы — самое время поговорить!</p>
+  <button class="btn btn-primary" onclick="closeMatch()">Отлично!</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SKILLS_BY_ROLE = {
+  'Программист': ['Unity C#','Unreal C++','Godot GDScript','Python','Rust','WebGL','Shader HLSL','Multiplayer','Physics','AI/ML'],
+  '2D художник': ['Photoshop','Procreate','Aseprite','Clip Studio','Krita','Character Design','Environment','UI Art'],
+  '3D художник': ['Blender','Maya','3ds Max','ZBrush','Substance','Rigging','Low-poly','PBR'],
+  'Pixel-арт художник': ['Aseprite','Character Sprites','Tiles','Animation','UI Pixel'],
+  'Аниматор': ['Spine 2D','Adobe Animate','Blender Rigging','Motion Capture','VFX'],
+  'Концепт-художник': ['Photoshop','Procreate','Character Design','Environment','World Building'],
+  'Геймдизайнер': ['Game Balance','Systems Design','Monetization','Prototyping','UX Research','Narrative Design'],
+  'Level designer': ['Blockmesh','Unreal Blueprints','Unity Scenes','WorldBuilding','Puzzle Design'],
+  'UI/UX дизайнер': ['Figma','Unity UI','HUD Design','UX Research','Wireframing'],
+  'Композитор': ['FL Studio','Ableton','Cubase','Orchestral','Chiptune','Adaptive Music','FMOD','Wwise'],
+  'Звуковой дизайнер': ['FMOD','Wwise','Sound Effects','Foley','Mix & Master','Procedural Audio'],
+  'Нарративный дизайнер': ['Twine','Ink','Dialogue Systems','World Building','Scriptwriting','Localization'],
+  'Продюсер': ['Project Management','Agile/Scrum','Trello','Jira','Budgeting','Team Lead'],
+  'QA тестировщик': ['Manual QA','Test Plans','Bug Tracking','Automation','Performance'],
+  'Community Manager': ['Discord','Social Media','Content Creation','Streaming','Press Kit']
+};
+const ALL_SKILLS = [...new Set(Object.values(SKILLS_BY_ROLE).flat())];
+
+let state = {
+  user: null,
+  currentPage: 'landing',
+  swipeCandidates: { projectId: null, card: null, filterRole: '', openRoles: [] },
+  swipeProjects: { card: null },
+  newProjectRoles: []
+};
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init() {
+  const me = await api('/api/me');
+  if (me.logged_in) {
+    setUser(me);
+    showPage('dashboard');
+  } else {
+    showPage('landing');
+  }
+}
+
+function setUser(me) {
+  state.user = me;
+  document.getElementById('nav-guest').style.display = 'none';
+  document.getElementById('nav-user').style.display = 'flex';
+  document.getElementById('nav-name').textContent = me.name;
+  document.getElementById('dash-title').textContent = `Привет, ${me.name} 👋`;
+}
+
+// ── API ───────────────────────────────────────────────────────────────────────
+async function api(url, method='GET', body=null) {
+  const opts = { method, headers: {'Content-Type':'application/json'} };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(url, opts);
+  return r.json();
+}
+
+// ── Routing ───────────────────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + name);
+  if (el) el.classList.add('active');
+  state.currentPage = name;
+  if (name === 'profile') loadProfile();
+  if (name === 'my-projects') loadMyProjects();
+  if (name === 'swipe-projects') loadProjectCard();
+  if (name === 'invitations') loadInvitations();
+  window.scrollTo(0, 0);
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+function openAuth(tab) {
+  document.getElementById('auth-modal').classList.add('open');
+  switchAuthTab(tab);
+}
+function closeAuth() {
+  document.getElementById('auth-modal').classList.remove('open');
+}
+function switchAuthTab(tab) {
+  document.getElementById('login-form').style.display = tab==='login' ? '' : 'none';
+  document.getElementById('register-form').style.display = tab==='register' ? '' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('auth-title').textContent = tab==='login' ? 'Войти' : 'Регистрация';
+}
+async function doLogin() {
+  const email = document.getElementById('l-email').value;
+  const password = document.getElementById('l-pass').value;
+  const res = await api('/api/login', 'POST', {email, password});
+  if (res.error) { document.getElementById('l-error').textContent = res.error; return; }
+  closeAuth();
+  const me = await api('/api/me');
+  setUser(me);
+  showPage('dashboard');
+}
+async function doRegister() {
+  const name = document.getElementById('r-name').value;
+  const email = document.getElementById('r-email').value;
+  const password = document.getElementById('r-pass').value;
+  const res = await api('/api/register', 'POST', {name, email, password});
+  if (res.error) { document.getElementById('r-error').textContent = res.error; return; }
+  closeAuth();
+  const me = await api('/api/me');
+  setUser(me);
+  showPage('dashboard');
+}
+async function doLogout() {
+  await api('/api/logout', 'POST');
+  state.user = null;
+  document.getElementById('nav-guest').style.display = '';
+  document.getElementById('nav-user').style.display = 'none';
+  showPage('landing');
+}
+
+// ── Profile ───────────────────────────────────────────────────────────────────
+const cpSelectedSkills = new Set();
+function loadProfile() {
+  api('/api/profile/candidate').then(p => {
+    if (p.role) document.getElementById('cp-role').value = p.role;
+    if (p.portfolio_url) document.getElementById('cp-portfolio').value = p.portfolio_url;
+    if (p.bio) document.getElementById('cp-bio').value = p.bio;
+    cpSelectedSkills.clear();
+    (p.skills || []).forEach(s => cpSelectedSkills.add(s));
+    renderSkillsPicker('cp-skills-picker', cpSelectedSkills, getProfileSkills);
+  });
+  document.getElementById('cp-role').addEventListener('change', () => {
+    renderSkillsPicker('cp-skills-picker', cpSelectedSkills, getProfileSkills);
+  });
+}
+function getProfileSkills() {
+  const role = document.getElementById('cp-role').value;
+  return SKILLS_BY_ROLE[role] || ALL_SKILLS.slice(0,20);
+}
+function renderSkillsPicker(containerId, selectedSet, getSkillsFn) {
+  const skills = getSkillsFn();
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  skills.forEach(s => {
+    const chip = document.createElement('div');
+    chip.className = 'skill-chip' + (selectedSet.has(s) ? ' selected' : '');
+    chip.textContent = s;
+    chip.onclick = () => {
+      if (selectedSet.has(s)) selectedSet.delete(s); else selectedSet.add(s);
+      renderSkillsPicker(containerId, selectedSet, getSkillsFn);
+    };
+    el.appendChild(chip);
+  });
+}
+async function saveProfile() {
+  const role = document.getElementById('cp-role').value;
+  if (!role) { document.getElementById('cp-error').textContent = 'Выбери роль'; return; }
+  const res = await api('/api/profile/candidate', 'POST', {
+    role,
+    skills: [...cpSelectedSkills],
+    portfolio_url: document.getElementById('cp-portfolio').value,
+    bio: document.getElementById('cp-bio').value
+  });
+  if (res.error) { document.getElementById('cp-error').textContent = res.error; return; }
+  showToast('Профиль сохранён ✓');
+  const me = await api('/api/me');
+  state.user = me;
+}
+
+// ── New Project ───────────────────────────────────────────────────────────────
+function openRoleModal() {
+  document.getElementById('rm-role').value = '';
+  document.getElementById('rm-desc').value = '';
+  rmSelectedSkills.clear();
+  renderSkillsPicker('rm-skills-picker', rmSelectedSkills, getRoleSkills);
+  document.getElementById('role-modal').classList.add('open');
+  document.getElementById('rm-role').addEventListener('change', () => {
+    renderSkillsPicker('rm-skills-picker', rmSelectedSkills, getRoleSkills);
+  });
+}
+function closeRoleModal() {
+  document.getElementById('role-modal').classList.remove('open');
+}
+const rmSelectedSkills = new Set();
+function getRoleSkills() {
+  const role = document.getElementById('rm-role').value;
+  return SKILLS_BY_ROLE[role] || ALL_SKILLS.slice(0,20);
+}
+function addRole() {
+  const role_name = document.getElementById('rm-role').value;
+  if (!role_name) return;
+  state.newProjectRoles.push({
+    role_name,
+    skills: [...rmSelectedSkills],
+    description: document.getElementById('rm-desc').value
+  });
+  closeRoleModal();
+  renderProjectRoles();
+}
+function renderProjectRoles() {
+  const el = document.getElementById('np-roles');
+  el.innerHTML = '';
+  state.newProjectRoles.forEach((r, i) => {
+    const div = document.createElement('div');
+    div.className = 'role-item';
+    div.innerHTML = `
+      <strong>${r.role_name}</strong>
+      ${r.skills.length ? '<div class="tags" style="margin-top:6px">' + r.skills.map(s=>`<span class="tag">${s}</span>`).join('') + '</div>' : ''}
+      ${r.description ? `<div style="font-size:.8rem;color:var(--text2);margin-top:4px">${r.description}</div>` : ''}
+      <button class="remove-role" onclick="removeRole(${i})">✕</button>
+    `;
+    el.appendChild(div);
+  });
+}
+function removeRole(i) {
+  state.newProjectRoles.splice(i, 1);
+  renderProjectRoles();
+}
+async function createProject() {
+  const title = document.getElementById('np-title').value.trim();
+  if (!title) { document.getElementById('np-error').textContent = 'Введи название'; return; }
+  const res = await api('/api/projects', 'POST', {
+    title,
+    description: document.getElementById('np-desc').value,
+    genre: document.getElementById('np-genre').value,
+    engine: document.getElementById('np-engine').value,
+    roles: state.newProjectRoles
+  });
+  if (res.error) { document.getElementById('np-error').textContent = res.error; return; }
+  state.newProjectRoles = [];
+  renderProjectRoles();
+  document.getElementById('np-title').value = '';
+  document.getElementById('np-desc').value = '';
+  showToast('Проект создан! 🎮');
+  showPage('my-projects');
+}
+
+// ── My Projects ───────────────────────────────────────────────────────────────
+async function loadMyProjects() {
+  const el = document.getElementById('mp-list');
+  el.innerHTML = '<div class="loader"></div>';
+  const projects = await api('/api/projects');
+  if (!projects.length) {
+    el.innerHTML = '<div class="swipe-empty"><div class="emoji">🎲</div><div>У тебя пока нет проектов</div></div>';
+    return;
+  }
+  el.innerHTML = '';
+  projects.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'project-item';
+    div.innerHTML = `
+      <div class="project-icon">🎮</div>
+      <div class="pi-info">
+        <div class="pi-title">${esc(p.title)}</div>
+        <div class="pi-sub">${p.genre || '—'} · ${p.engine || '—'} · ${p.roles_count} роли · ${p.invites_count} заявок</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sm" style="background:var(--accent);color:#fff" onclick="startSwipeCandidates(${p.id},'${esc(p.title)}');event.stopPropagation()">Найти команду</button>
+      </div>
+    `;
+    el.appendChild(div);
+  });
+}
+function startSwipeCandidates(projectId, title) {
+  state.swipeCandidates.projectId = projectId;
+  state.swipeCandidates.card = null;
+  state.swipeCandidates.filterRole = '';
+  document.getElementById('sc-title').textContent = `Кандидаты для «${title}»`;
+  showPage('swipe-candidates');
+  loadCandidateCard();
+}
+
+// ── Swipe Candidates ──────────────────────────────────────────────────────────
+async function loadCandidateCard() {
+  const pid = state.swipeCandidates.projectId;
+  const role = state.swipeCandidates.filterRole;
+  document.getElementById('sc-loader').style.display = 'block';
+  document.getElementById('sc-wrapper').style.display = 'none';
+  document.getElementById('sc-empty').style.display = 'none';
+  document.getElementById('sc-actions').style.display = 'none';
+  const res = await api(`/api/swipe/candidates?project_id=${pid}&role=${encodeURIComponent(role)}`);
+  document.getElementById('sc-loader').style.display = 'none';
+  if (res.open_roles && !state.swipeCandidates.openRoles.length) {
+    renderCandidateFilters(res.open_roles);
+    state.swipeCandidates.openRoles = res.open_roles;
+  }
+  if (!res.card) {
+    document.getElementById('sc-empty').style.display = 'block';
+    document.getElementById('sc-empty-msg').textContent = res.message || 'Кандидаты закончились';
+    return;
+  }
+  state.swipeCandidates.card = res.card;
+  fillCandidateCard(res.card);
+  document.getElementById('sc-wrapper').style.display = 'block';
+  document.getElementById('sc-actions').style.display = 'flex';
+  const card = document.getElementById('sc-card');
+  card.classList.remove('fly-right','fly-left');
+}
+function renderCandidateFilters(roles) {
+  const el = document.getElementById('sc-filters');
+  el.innerHTML = '<div class="filter-chip active" onclick="setRoleFilter(this,\'\')" >Все роли</div>' +
+    roles.map(r => `<div class="filter-chip" onclick="setRoleFilter(this,'${esc(r)}')">${esc(r)}</div>`).join('');
+}
+function setRoleFilter(el, role) {
+  document.querySelectorAll('#sc-filters .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  state.swipeCandidates.filterRole = role;
+  state.swipeCandidates.card = null;
+  loadCandidateCard();
+}
+function fillCandidateCard(c) {
+  document.getElementById('sc-role').textContent = c.role || '';
+  document.getElementById('sc-name').textContent = c.name || '';
+  document.getElementById('sc-bio').textContent = c.bio || 'Нет описания';
+  const tagsEl = document.getElementById('sc-skills');
+  tagsEl.innerHTML = (c.skills || []).map(s => `<span class="tag">${esc(s)}</span>`).join('');
+  const portEl = document.getElementById('sc-portfolio');
+  if (c.portfolio_url) {
+    portEl.href = c.portfolio_url;
+    portEl.textContent = '🔗 ' + c.portfolio_url;
+    portEl.style.display = 'block';
+  } else {
+    portEl.style.display = 'none';
+  }
+}
+async function doSwipe(direction) {
+  const card = state.swipeCandidates.card;
+  if (!card) return;
+  const cardEl = document.getElementById('sc-card');
+  cardEl.classList.add(direction === 'like' ? 'fly-right' : 'fly-left');
+  const res = await api('/api/swipe', 'POST', {
+    target_type: 'candidate',
+    target_id: card.user_id,
+    direction,
+    project_id: state.swipeCandidates.projectId
+  });
+  if (res.match) showToast('Приглашение отправлено!');
+  setTimeout(() => loadCandidateCard(), 350);
+}
+
+// ── Swipe Projects ────────────────────────────────────────────────────────────
+async function loadProjectCard() {
+  document.getElementById('sp-loader').style.display = 'block';
+  document.getElementById('sp-wrapper').style.display = 'none';
+  document.getElementById('sp-empty').style.display = 'none';
+  document.getElementById('sp-actions').style.display = 'none';
+  const res = await api('/api/swipe/projects');
+  document.getElementById('sp-loader').style.display = 'none';
+  if (!res.card) {
+    document.getElementById('sp-empty').style.display = 'block';
+    document.getElementById('sp-empty-msg').textContent = res.message || 'Проекты закончились';
+    return;
+  }
+  state.swipeProjects.card = res.card;
+  fillProjectCard(res.card);
+  document.getElementById('sp-wrapper').style.display = 'block';
+  document.getElementById('sp-actions').style.display = 'flex';
+  document.getElementById('sp-card').classList.remove('fly-right','fly-left');
+}
+function fillProjectCard(p) {
+  document.getElementById('sp-title').textContent = p.title;
+  const badges = document.getElementById('sp-badges');
+  badges.innerHTML = '';
+  if (p.genre) badges.innerHTML += `<span class="badge">${esc(p.genre)}</span> `;
+  if (p.engine) badges.innerHTML += `<span class="badge green">${esc(p.engine)}</span>`;
+  document.getElementById('sp-desc').textContent = p.description || 'Нет описания';
+  document.getElementById('sp-owner').textContent = `👤 ${p.owner_name}`;
+  const rolesEl = document.getElementById('sp-roles');
+  const roles = Array.isArray(p.open_roles) ? p.open_roles.filter(Boolean) : [];
+  rolesEl.innerHTML = roles.map(r => `<span class="tag">${esc(r)}</span>`).join('');
+}
+async function doProjectSwipe(direction) {
+  const card = state.swipeProjects.card;
+  if (!card) return;
+  const cardEl = document.getElementById('sp-card');
+  cardEl.classList.add(direction === 'like' ? 'fly-right' : 'fly-left');
+  const res = await api('/api/swipe', 'POST', {
+    target_type: 'project',
+    target_id: card.id,
+    direction
+  });
+  if (res.match && res.match.type === 'match') {
+    document.getElementById('match-msg').textContent = res.match.message || 'Вы взаимно заинтересованы!';
+    document.getElementById('match-popup').classList.add('show');
+  } else if (direction === 'like') {
+    showToast('Заявка отправлена!');
+  }
+  setTimeout(() => loadProjectCard(), 350);
+}
+function closeMatch() {
+  document.getElementById('match-popup').classList.remove('show');
+}
+
+// ── Invitations ───────────────────────────────────────────────────────────────
+async function loadInvitations() {
+  const el = document.getElementById('inv-content');
+  el.innerHTML = '<div class="loader"></div>';
+  const data = await api('/api/invitations');
+  let html = '';
+  // Received as candidate
+  const received = data.as_candidate.filter(i => i.from_owner);
+  if (received.length) {
+    html += '<div class="section-title" style="font-size:1.1rem;margin-bottom:12px">Тебя приглашают 📩</div>';
+    received.forEach(i => {
+      html += `<div class="inv-item">
+        <div class="inv-header">
+          <span class="badge">${esc(i.project_title)}</span>
+          <span class="badge ${statusColor(i.status)}">${statusLabel(i.status)}</span>
+        </div>
+        <div style="font-size:.85rem;color:var(--text2)">Жанр: ${i.genre||'—'} · от ${esc(i.owner_name)}</div>
+        ${i.status==='pending' ? `<div class="inv-actions">
+          <button class="btn-sm btn-accept" onclick="respondInv(${i.id},'accept')">Принять</button>
+          <button class="btn-sm btn-reject" onclick="respondInv(${i.id},'reject')">Отклонить</button>
+        </div>` : ''}
+      </div>`;
+    });
+  }
+  // Sent applications
+  const sent = data.as_candidate.filter(i => !i.from_owner);
+  if (sent.length) {
+    html += '<div class="section-title" style="font-size:1.1rem;margin:20px 0 12px">Мои заявки 📤</div>';
+    sent.forEach(i => {
+      html += `<div class="inv-item">
+        <div class="inv-header">
+          <span class="badge">${esc(i.project_title)}</span>
+          <span class="badge ${statusColor(i.status)}">${statusLabel(i.status)}</span>
+        </div>
+        <div style="font-size:.85rem;color:var(--text2)">Жанр: ${i.genre||'—'} · ${esc(i.owner_name)}</div>
+      </div>`;
+    });
+  }
+  // As owner
+  if (data.as_owner.length) {
+    html += '<div class="section-title" style="font-size:1.1rem;margin:20px 0 12px">Заявки в мои проекты 🎮</div>';
+    data.as_owner.forEach(i => {
+      html += `<div class="inv-item">
+        <div class="inv-header">
+          <span class="badge">${esc(i.candidate_name)}</span>
+          <span style="font-size:.8rem;color:var(--text2)">${i.candidate_role||''}</span>
+          <span class="badge ${statusColor(i.status)}">${statusLabel(i.status)}</span>
+        </div>
+        <div style="font-size:.85rem;color:var(--text2)">Проект: ${esc(i.project_title)}</div>
+        ${i.candidate_skills ? '<div class="tags" style="margin-top:8px">'+i.candidate_skills.map(s=>`<span class="tag">${esc(s)}</span>`).join('')+'</div>' : ''}
+        ${i.portfolio_url ? `<a href="${i.portfolio_url}" target="_blank" style="font-size:.8rem">🔗 Портфолио</a>` : ''}
+        ${!i.from_owner && i.status==='pending' ? `<div class="inv-actions">
+          <button class="btn-sm btn-accept" onclick="respondInv(${i.id},'accept')">Принять</button>
+          <button class="btn-sm btn-reject" onclick="respondInv(${i.id},'reject')">Отклонить</button>
+        </div>` : ''}
+      </div>`;
+    });
+  }
+  if (!html) html = '<div class="swipe-empty"><div class="emoji">📭</div><div>Пока нет приглашений</div></div>';
+  el.innerHTML = html;
+}
+async function respondInv(id, action) {
+  const res = await api(`/api/invitations/${id}/respond`, 'POST', {action});
+  if (res.ok) { showToast(action==='accept' ? 'Принято!' : 'Отклонено'); loadInvitations(); }
+}
+function statusColor(s) { return s==='accepted'?'green':s==='rejected'?'red':''; }
+function statusLabel(s) { return {pending:'Ожидает',accepted:'Принято',rejected:'Отклонено'}[s]||s; }
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (state.currentPage==='swipe-candidates') {
+    if (e.key==='ArrowRight') doSwipe('like');
+    if (e.key==='ArrowLeft') doSwipe('pass');
+  }
+  if (state.currentPage==='swipe-projects') {
+    if (e.key==='ArrowRight') doProjectSwipe('like');
+    if (e.key==='ArrowLeft') doProjectSwipe('pass');
+  }
+  if (e.key==='Escape') {
+    closeAuth(); closeRoleModal(); closeMatch();
+  }
+});
+
+// Click outside to close modals
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target===o) { closeAuth(); closeRoleModal(); } });
+});
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+init();
+</script>
+</body>
+</html>
